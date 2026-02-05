@@ -5,7 +5,7 @@ import { onMounted } from 'vue'
 async function getCompactDisc() {
   const response = await axios.get('http://localhost/api/v1/compact-disc', {
     headers: {
-      Authorization: 'Bearer 1|VDPl73Hqcfs8GUfL0q7SyTzmpIelxIzP2iroNsKD7ee59d30',
+      Authorization: `Bearer ${import.meta.env.VITE_LARAVEL_API_TOKEN}`,
     },
   })
 }
