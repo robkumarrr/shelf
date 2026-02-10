@@ -10,9 +10,6 @@ export function useAxios() {
     function(config: InternalAxiosRequestConfig): InternalAxiosRequestConfig {
       config.headers.set('Authorization', `Bearer ${import.meta.env.VITE_API_TOKEN}`)
       return config
-    },
-    function() {
-
     }
   )
 
