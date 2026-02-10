@@ -3,18 +3,34 @@ import { onMounted, ref } from 'vue'
 import { useAxios } from '@/composables/useAxios.ts'
 
 type ApiResource = {
-  data: object[]
+  data: ApiData[]
   links: object
   meta: object
 }
 
+type ApiData = {
+  type: string
+  id: number
+  attributes: CompactDisc
+}
+
+type CompactDisc = {
+  id: number
+  artist: string
+  album_name: string
+  number_of_songs: number
+  released_on: Date
+  created_at: Date
+  updated_at: Date
+}
+
 const { get } = useAxios()
-const data = ref<object[]>([])
+const data = ref<ApiData[]>([])
 
 async function fetchData() {
   const response = await get<ApiResource>('api/v1/compact-disc')
-  data.value = response
-  console.log(data)
+  data.value = response.data
+  console.log(data.value)
 }
 
 onMounted(() => {
@@ -35,11 +51,11 @@ onMounted(() => {
         </tr>
       </thead>
       <tbody>
-        <tr v-for="item in data.data" :key="item.id">
+        <tr v-for="item in data" :key="item.id">
           <td>{{ item.attributes.artist }}</td>
           <td>{{ item.attributes.album_name }}</td>
           <td>{{ item.attributes.number_of_songs }}</td>
-          <td>{{ new Date(item.attributes.released_on)}}</td>
+          <td>{{ new Date(item.attributes.released_on).toISOString().substring(0, 10) }}</td>
         </tr>
       </tbody>
     </table>
