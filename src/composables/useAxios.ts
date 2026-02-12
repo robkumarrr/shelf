@@ -6,6 +6,9 @@ export function useAxios() {
   const loadingStore = useLoadingStore()
   const { isLoading } = storeToRefs(loadingStore)
 
+  axios.defaults.withCredentials = true
+  axios.defaults.withXSRFToken = true
+
   axios.interceptors.request.use(
     function(config: InternalAxiosRequestConfig): InternalAxiosRequestConfig {
       config.headers.set('Authorization', `Bearer ${import.meta.env.VITE_API_TOKEN}`)
@@ -32,18 +35,23 @@ export function useAxios() {
     }
   }
 
-  async function post(endpoint: string): Promise<object> {
-    const response: Promise<object> = axios.post(
-      `${import.meta.env.VITE_API_URL}${endpoint}`,
-      {},
-      {
-        headers: {
-          Authorization: `Bearer ${import.meta.env.VITE_API_TOKEN}`,
+  async function post(endpoint: string, data: object): Promise<object> {
+    try {
+      const response: Promise<object> = axios.post(
+        `${import.meta.env.VITE_API_URL}${endpoint}`,
+        data,
+        {
+          headers: {
+            Authorization: `Bearer ${import.meta.env.VITE_API_TOKEN}`,
+          },
         },
-      },
-    )
+      )
+      return response
+    } catch (error) {
+      console.error(error)
+      throw error
 
-    return response
+    }
   }
 
   return { get, post }
