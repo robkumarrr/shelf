@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { onMounted, ref } from 'vue'
-import { useAxios } from '@/composables/useAxios.ts'
+import { useAxios } from '@/composables/axios/useAxios.ts'
 
 type ApiResource = {
   data: ApiData[]
