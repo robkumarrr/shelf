@@ -40,6 +40,10 @@ onMounted(() => {
 
 <template>
   <h1>You did it!</h1>
+  <router-link to="/">Home</router-link>
+  <router-link to="/login">Login</router-link>
+  <router-link to="/register">Register</router-link>
+  <router-view />
   <section>
     <table>
       <thead>
