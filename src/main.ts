@@ -17,9 +17,13 @@ app.use(PrimeVue, {
     options: {
       prefix: 'p',
       darkModeSelector: 'light',
-      cssLayer: false,
+      cssLayer: {
+        name: 'primevue',
+        order: 'tailwind-base, primevue, tailwind-utilities',
+      },
     },
   },
 })
+app.use(ToastService)
 
 app.mount('#app')
