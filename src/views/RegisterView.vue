@@ -8,8 +8,7 @@ import { Button } from 'primevue'
 import { useToast } from 'primevue/usetoast'
 import Toast from 'primevue/toast'
 import { ref } from 'vue'
-
-const toast = useToast()
+import { useAxios } from '@/composables/axios/useAxios.ts'
 
 type RegistrationData = {
   username: string
@@ -32,7 +31,7 @@ const registrationForm = z
       .min(5, { message: 'Username is not long enough.' })
       .trim()
       .lowercase(),
-    email: z.email({ error: 'Email is required.' }).trim(),
+    email: z.email({ error: 'Email is required.' }).trim().lowercase(),
     password: z
       .string({ error: 'Password is required.' })
       .min(8, { message: 'Password is not long enough.' }),
@@ -44,9 +43,18 @@ const registrationForm = z
   })
 
 const resolver = ref(zodResolver(registrationForm))
+const toast = useToast()
+const { get, post } = useAxios()
 
-function onFormSubmit() {
+async function onFormSubmit({ values }: { values: RegistrationData }) {
   console.log('Form submitted')
+  const { password_confirmation: _, ...registrationData }: RegistrationData = values
+  try {
+    await get('/sanctum/csrf-cookie')
+    const response = await post('/register', registrationData)
+  } catch (error) {
+    console.error(error)
+  }
   toast.add({ severity: 'success', summary: 'Registering...', life: 3000 })
 }
 </script>
@@ -91,7 +99,7 @@ function onFormSubmit() {
           severity="error"
           size="small"
           variant="simple"
-          >
+        >
           {{ $form.password_confirmation.error?.message }}
         </Message>
         <Button class="w-fit mx-auto" type="submit" severity="secondary" label="Register" />
