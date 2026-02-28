@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { onMounted, ref } from 'vue'
 import { useAxios } from '@/composables/axios/useAxios.ts'
+import { Toast } from 'primevue'
 
 type ApiResource = {
   data: ApiData[]
@@ -39,6 +40,7 @@ onMounted(() => {
 </script>
 
 <template>
+  <Toast />
   <h1>You did it!</h1>
   <router-link to="/">Home</router-link>
   <router-link to="/login">Login</router-link>
