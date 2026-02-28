@@ -11,7 +11,7 @@ describe('Loading Store', () => {
     loadingStore = useLoadingStore()
   })
 
-  it('tests loading store holds isLoading with a default of false', () => {
+  it('exposes isLoading with a default of false', () => {
     expect(loadingStore.isLoading).toBe(false)
   })
 })
