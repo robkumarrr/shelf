@@ -6,3 +6,7 @@ html {
   font-optical-sizing: auto;
   font-style: normal;
 }
+
+@utility animated-link {
+  @apply text-indigo-600 border-b border-transparent hover:border-indigo-700 hover:text-indigo-700 transition-all duration-300;
+}
