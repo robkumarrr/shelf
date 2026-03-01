@@ -4,7 +4,7 @@ import { describe, expect, it, beforeEach, vi } from 'vitest'
 
 vi.mock('@/composables/axios/useAxios', () => ({
   useAxios: () => ({
-    get: vi.fn().mockResolvedValue({ data: null }), // fake CSRF call
+    get: vi.fn().mockResolvedValue({ data: null }),
     post: vi.fn().mockResolvedValue({
       status: 201,
       data: {

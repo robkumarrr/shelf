@@ -16,10 +16,11 @@ export const useAuthStore = defineStore('auth', () => {
   async function register(registerPayload: RegisterPayload): Promise<void> {
     try {
       await get('/sanctum/csrf-cookie')
-      const response: AxiosResponse = await post('/api/register', registerPayload)
 
+      const response: AxiosResponse = await post('/api/register', registerPayload)
       email.value = response.data?.attributes.email
       username.value = response.data?.attributes.name
+
       isAuthenticated.value = true
 
     } catch (error) {
