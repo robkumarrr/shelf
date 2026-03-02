@@ -49,7 +49,7 @@ async function onFormSubmit({ values, valid }: FormSubmitEvent) {
     })
     await router.push({ path: '/' })
   } catch (error) {
-    toast.add({ severity: 'error', summary: `Registration failed: ${error}`, life: 300 })
+    toast.add({ severity: 'error', summary: `Registration failed: ${error}`, life: 3000 })
   }
 }
 </script>
