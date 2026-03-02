@@ -55,7 +55,7 @@ async function onFormSubmit({ values, valid }: FormSubmitEvent) {
 </script>
 
 <template>
-  <section class="flex min-h-screen justify-center items-center">
+  <section class="flex min-h-screen justify-center items-center w-[90%] sm:max-w-lg mx-auto">
     <ProgressSpinner v-if="isLoading" />
     <Form
       v-else
