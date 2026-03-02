@@ -7,11 +7,10 @@ export function useAxios() {
   const loadingStore = useLoadingStore()
   const { isLoading } = storeToRefs(loadingStore)
 
-  async function get<T>(endpoint: string): Promise<T> {
+  async function get<T>(endpoint: string): Promise<AxiosResponse<T>> {
     try {
       isLoading.value = true
-      const response: AxiosResponse<T> = await axiosInstance.get(endpoint)
-      return response.data
+      return await axiosInstance.get(endpoint)
 
     } catch (error: unknown) {
       console.error(error)
@@ -22,14 +21,13 @@ export function useAxios() {
     }
   }
 
-  async function post<T>(endpoint: string, data: object): Promise<T> {
+  async function post<T>(endpoint: string, data: object): Promise<AxiosResponse<T>> {
     try {
       isLoading.value = true
-      const response: AxiosResponse<T> = await axiosInstance.post(
+      return await axiosInstance.post(
         endpoint,
         data,
       )
-      return response.data
     } catch (error: unknown) {
       console.error(error)
       throw error
@@ -38,14 +36,10 @@ export function useAxios() {
     }
   }
 
-  async function patch<T>(endpoint: string, data: object): Promise<T> {
+  async function patch<T>(endpoint: string, data: object): Promise<AxiosResponse<T>> {
     try {
       isLoading.value = true
-      const response: AxiosResponse<T> = await axiosInstance.patch(
-        endpoint,
-        data,
-      )
-      return response.data
+      return await axiosInstance.patch(endpoint, data)
     } catch (error: unknown) {
       console.error(error)
       throw error
@@ -54,14 +48,10 @@ export function useAxios() {
     }
   }
 
-  async function put<T>(endpoint: string, data: object): Promise<T> {
+  async function put<T>(endpoint: string, data: object): Promise<AxiosResponse<T>> {
     try {
       isLoading.value = true
-      const response: AxiosResponse<T> = await axiosInstance.put(
-        endpoint,
-        data,
-      )
-      return response.data
+      return await axiosInstance.put(endpoint, data)
     } catch (error: unknown) {
       console.error(error)
       throw error
@@ -70,13 +60,10 @@ export function useAxios() {
     }
   }
 
-  async function destroy<T>(endpoint: string): Promise<T> {
+  async function destroy<T>(endpoint: string): Promise<AxiosResponse<T>> {
     try {
       isLoading.value = true
-      const response: AxiosResponse<T> = await axiosInstance.delete(
-        endpoint,
-      )
-      return response.data
+      return await axiosInstance.delete(endpoint)
     } catch (error: unknown) {
       console.error(error)
       throw error

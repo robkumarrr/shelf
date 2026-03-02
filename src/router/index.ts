@@ -3,8 +3,10 @@ import LoginView from '../views/LoginView.vue'
 import RegisterView from '../views/RegisterView.vue'
 
 const routes = [
+  { path: '/', component: LoginView },
   { path: '/login', component: LoginView },
   { path: '/register', component: RegisterView },
+  // { path: '/collection', meta: { requiresAuth: true } },
 ]
 
 const router = createRouter({

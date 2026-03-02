@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { onMounted, ref } from 'vue'
 import { useAxios } from '@/composables/axios/useAxios.ts'
+import { Toast } from 'primevue'
 
 type ApiResource = {
   data: ApiData[]
@@ -29,7 +30,7 @@ const data = ref<ApiData[]>([])
 
 async function fetchData() {
   const response = await get<ApiResource>('api/v1/compact-disc')
-  data.value = response.data
+  data.value = response.data.data
   console.log(data.value)
 }
 
@@ -39,6 +40,7 @@ onMounted(() => {
 </script>
 
 <template>
+  <Toast />
   <h1>You did it!</h1>
   <router-link to="/">Home</router-link>
   <router-link to="/login">Login</router-link>
