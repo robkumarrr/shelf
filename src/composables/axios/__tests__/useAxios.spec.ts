@@ -23,7 +23,7 @@ describe('useAxios composable', () => {
       const mockData = { id: 1, data: {} }
       vi.mocked(axiosInstance.get).mockImplementation(async () => {
         expect(loadingStore.isLoading).toBe(true)
-        return { data: mockData }
+        return mockData
       })
 
       const { get } = useAxios()
@@ -54,7 +54,7 @@ describe('useAxios composable', () => {
       const mockData = { id: 1, data: {} }
       vi.mocked(axiosInstance.post).mockImplementation(async () => {
         expect(loadingStore.isLoading).toBe(true)
-        return { data: mockData }
+        return mockData
       })
 
       const requestData = { fake: 'data' }
@@ -87,7 +87,7 @@ describe('useAxios composable', () => {
       const mockData = { id: 1, data: {} }
       vi.mocked(axiosInstance.patch).mockImplementation(async () => {
         expect(loadingStore.isLoading).toBe(true)
-        return { data: mockData }
+        return mockData
       })
 
       const requestData = { fake: 'data' }
@@ -120,7 +120,7 @@ describe('useAxios composable', () => {
       const mockData = { id: 1, data: {} }
       vi.mocked(axiosInstance.put).mockImplementation(async () => {
         expect(loadingStore.isLoading).toBe(true)
-        return { data: mockData }
+        return mockData
       })
 
       const requestData = { fake: 'data' }
@@ -159,7 +159,7 @@ describe('useAxios composable', () => {
       const mockData = { id: 1, data: {} }
       vi.mocked(axiosInstance.delete).mockImplementation(async () => {
         expect(loadingStore.isLoading).toBe(true)
-        return { data: mockData }
+        return mockData
       })
 
       const { destroy } = useAxios()
