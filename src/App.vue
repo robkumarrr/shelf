@@ -30,7 +30,7 @@ const data = ref<ApiData[]>([])
 
 async function fetchData() {
   const response = await get<ApiResource>('api/v1/compact-disc')
-  data.value = response.data
+  data.value = response.data.data
   console.log(data.value)
 }
 
