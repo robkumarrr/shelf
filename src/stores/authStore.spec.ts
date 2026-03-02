@@ -15,9 +15,11 @@ vi.mock('@/stores/userStore', () => ({
 const mockPost = vi.fn().mockResolvedValue({
   status: 201,
   data: {
-    attributes: {
-      name: 'testuser',
-      email: 'test@example.com',
+    data: {
+      attributes: {
+        name: 'testuser',
+        email: 'test@example.com',
+      },
     },
   },
 })
