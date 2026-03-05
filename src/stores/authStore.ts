@@ -3,6 +3,7 @@ import { defineStore, storeToRefs } from 'pinia'
 import { useAxios } from '@/composables/axios/useAxios.ts'
 import { useUserStore } from '@/stores/userStore.ts'
 import type { RegisterPayload } from '@/schemas/RegistrationSchema.ts'
+import type { LoginPayload } from '@/schemas/LoginSchema.ts'
 import type { AxiosResponse } from 'axios'
 
 export const useAuthStore = defineStore('auth', () => {
@@ -29,5 +30,22 @@ export const useAuthStore = defineStore('auth', () => {
     }
   }
 
-  return { isAuthenticated, register }
+  async function login(loginPayload: LoginPayload): Promise<void> {
+    try {
+      await get('/sanctum/csrf-cookie')
+
+      const response: AxiosResponse = await post('/api/login', loginPayload)
+      // TODO: make call to get user after logging in or add user to return value of login
+      email.value = response.data?.data?.attributes?.email
+      username.value = response.data?.data?.attributes.name
+
+      isAuthenticated.value = true
+
+    } catch (error) {
+      console.error(error)
+      throw new Error(`${error}`)
+    }
+  }
+
+  return { isAuthenticated, register, login }
 })
