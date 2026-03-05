@@ -7,6 +7,7 @@ export const loginSchema = z
       .check(z.email('Email formatting is incorrect.'))
       .trim(),
     password: z.string({ error: 'Password is required.' })
+      .min(1, 'Password is required.')
   })
 
 export type LoginData = z.infer<typeof loginSchema>

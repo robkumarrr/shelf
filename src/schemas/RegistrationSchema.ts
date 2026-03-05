@@ -13,7 +13,8 @@ export const registrationSchema = z
     password: z
       .string({ error: 'Password is required.' })
       .min(8, { message: 'Password is not long enough.' }),
-    password_confirmation: z.string({ error: 'Password confirmation is required.' }),
+    password_confirmation: z.string({ error: 'Password confirmation is required.' })
+      .min(1, 'Password confirmation is required.'),
   })
   .refine((regForm) => regForm.password === regForm.password_confirmation, {
     message: 'Passwords do not match.',
