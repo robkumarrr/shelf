@@ -6,7 +6,10 @@ export const registrationSchema = z
       .string({ error: 'Username is required.' })
       .min(5, { message: 'Username is not long enough.' })
       .trim(),
-    email: z.email({ error: 'Email formatting is incorrect.' }).trim(),
+    email: z.string()
+      .min(1, 'Email is required.')
+      .check(z.email('Email formatting is incorrect.'))
+      .trim(),
     password: z
       .string({ error: 'Password is required.' })
       .min(8, { message: 'Password is not long enough.' }),
