@@ -99,7 +99,13 @@ async function onFormSubmit({ values, valid }: FormSubmitEvent) {
         >
           {{ $form.password_confirmation.error?.message }}
         </Message>
-        <Button class="w-fit mx-auto" type="submit" severity="secondary" label="Register" />
+        <Button
+          class="w-fit mx-auto"
+          type="submit"
+          severity="secondary"
+          :disabled="isLoading"
+          label="Register"
+        />
       </div>
     </Form>
   </section>

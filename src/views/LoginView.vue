@@ -41,7 +41,7 @@ async function onFormSubmit({ values, valid }: FormSubmitEvent) {
     const { ...loginData } = values as LoginData
     await login(loginData)
     toast.add({
-      severity: 'succees',
+      severity: 'success',
       summary: 'Login successful. Redirecting...',
       life: 3000,
     })
@@ -80,7 +80,13 @@ async function onFormSubmit({ values, valid }: FormSubmitEvent) {
         <Message v-if="$form.password?.invalid" severity="error" size="small" variant="simple">
           {{ $form.password.error?.message }}
         </Message>
-        <Button class="w-fit mx-auto" type="submit" severity="secondary" label="Login" />
+        <Button
+          class="w-fit mx-auto"
+          type="submit"
+          severity="secondary"
+          :disabled="isLoading"
+          label="Login"
+        />
       </div>
     </Form>
   </section>
