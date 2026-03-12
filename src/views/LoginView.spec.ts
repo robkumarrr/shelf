@@ -57,18 +57,67 @@ describe('Login View', () => {
   })
 
   describe('Mounts', () => {
-    it('mounts the page', () => {
-      const wrapper = mount(LoginView, {
+    let wrapper: ReturnType<typeof mount>
+
+    beforeEach(() => {
+      wrapper = mount(LoginView, {
         global: {
           plugins: [
-            createPinia(), // Pinia
-            router, // Vue Router
-            PrimeVue, // PrimeVue core
-            ToastService, // Makes useToast() happy
+            createPinia(),
+            router,
+            PrimeVue,
+            ToastService,
           ],
         },
       })
+    })
+
+    it('mounts the page', () => {
+      expect(wrapper.exists()).toBe(true)
+    })
+
+    it('loading store values are default', () => {
+      expect(wrapper.exists()).toBe(true)
+    })
+
+    it('auth store values are default', () => {
+      expect(wrapper.exists()).toBe(true)
+    })
+
+  })
+
+  describe('Authorization', () => {
+    let wrapper: ReturnType<typeof mount>
+
+    beforeEach(() => {
+      wrapper = mount(LoginView, {
+        global: {
+          plugins: [createPinia(), router, PrimeVue, ToastService],
+        },
+      })
+    })
+
+    it('renders the login form', () => {
       expect(wrapper.exists()).toBe(true)
     })
   })
 })
+
+//TODO:
+// 1. Rendering — What should be visible when the page loads?
+// Is the form there?
+// Are the input fields present?
+// Is the submit button there?
+//
+//TODO:
+// 2. Interaction — What happens when the user does something?
+// Can they type into the fields?
+// What happens when they submit with empty fields?
+// What happens when they submit with valid credentials?
+// What happens when the API returns an error?
+//
+//TODO:
+// 3. Side effects — What should happen as a result of interaction?
+// Does the store get updated after a successful login?
+// Does the user get redirected?
+// Does a toast/error message appear?
