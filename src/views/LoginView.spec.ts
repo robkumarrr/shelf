@@ -1,7 +1,20 @@
 import { createPinia, setActivePinia } from 'pinia'
 import { useAuthStore } from '@/stores/authStore.ts'
+import { mount } from '@vue/test-utils'
 import { describe, expect, it, beforeEach, vi } from 'vitest'
 import { ref } from 'vue'
+import LoginView from '@/views/LoginView.vue'
+import { createRouter, createMemoryHistory } from 'vue-router'
+import PrimeVue from 'primevue/config'
+import ToastService from 'primevue/toastservice'
+
+const router = createRouter({
+  history: createMemoryHistory(),
+  routes: [
+    { path: '/', component: { template: '<div />' } },
+    { path: '/register', component: { template: '<div />' } },
+  ],
+})
 
 const mockUserStore = {
   username: ref<string | null>(null),
@@ -44,11 +57,18 @@ describe('Login View', () => {
   })
 
   describe('Mounts', () => {
-
     it('mounts the page', () => {
-
+      const wrapper = mount(LoginView, {
+        global: {
+          plugins: [
+            createPinia(), // Pinia
+            router, // Vue Router
+            PrimeVue, // PrimeVue core
+            ToastService, // Makes useToast() happy
+          ],
+        },
+      })
+      expect(wrapper.exists()).toBe(true)
     })
-
   })
 })
-
