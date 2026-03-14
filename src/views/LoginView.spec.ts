@@ -1,5 +1,4 @@
 import { createPinia, setActivePinia } from 'pinia'
-import { useAuthStore } from '@/stores/authStore.ts'
 import { mount } from '@vue/test-utils'
 import { describe, expect, it, beforeEach, vi } from 'vitest'
 import { ref } from 'vue'
@@ -25,6 +24,22 @@ vi.mock('@/stores/userStore', () => ({
   useUserStore: () => mockUserStore,
 }))
 
+const mockAuthStore = {
+  isAuthenticated: ref<boolean>(false)
+}
+
+vi.mock('@/stores/authStore', () => ({
+  useAuthStore: () => mockAuthStore,
+}))
+
+const mockLoadingStore = {
+  isLoading: ref<boolean>(false),
+}
+
+vi.mock('@/stores/loadingStore', () => ({
+  useLoadingStore: () => mockLoadingStore,
+}))
+
 const mockPost = vi.fn().mockResolvedValue({
   status: 201,
   data: {
@@ -47,16 +62,13 @@ vi.mock('@/composables/axios/useAxios', () => ({
 }))
 
 describe('Login View', () => {
-  let authStore: ReturnType<typeof useAuthStore>
-
   beforeEach(() => {
     setActivePinia(createPinia())
     mockUserStore.email.value = null
     mockUserStore.username.value = null
-    authStore = useAuthStore()
   })
 
-  describe('Mounts', () => {
+  describe('Mounts and defaults', () => {
     let wrapper: ReturnType<typeof mount>
 
     beforeEach(() => {
@@ -77,16 +89,23 @@ describe('Login View', () => {
     })
 
     it('loading store values are default', () => {
-      expect(wrapper.exists()).toBe(true)
+      const { isLoading } = mockLoadingStore;
+      expect(isLoading.value).toBe(false);
     })
 
     it('auth store values are default', () => {
-      expect(wrapper.exists()).toBe(true)
+      const { isAuthenticated } = mockAuthStore;
+      expect(isAuthenticated.value).toBe(false);
     })
 
+    it('user store values are default', () => {
+      const { username, email } = mockUserStore;
+      expect(username.value).toBe(null);
+      expect(email.value).toBe(null);
+    })
   })
 
-  describe('Authorization', () => {
+  describe('Authentication', () => {
     let wrapper: ReturnType<typeof mount>
 
     beforeEach(() => {
@@ -98,7 +117,13 @@ describe('Login View', () => {
     })
 
     it('renders the login form', () => {
-      expect(wrapper.exists()).toBe(true)
+      const loginForm = wrapper.find('[data-testid="login-form"]')
+      expect(loginForm.exists()).toBe(true)
+    })
+
+    it('renders the login form', () => {
+      const loginForm = wrapper.find('[data-testid="login-form"]')
+      expect(loginForm.exists()).toBe(true)
     })
   })
 })

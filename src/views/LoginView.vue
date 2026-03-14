@@ -56,6 +56,7 @@ async function onFormSubmit({ values, valid }: FormSubmitEvent) {
   <section class="flex min-h-screen justify-center items-center w-[90%] sm:max-w-lg mx-auto">
     <ProgressSpinner v-if="isLoading" />
     <Form
+      data-testid="login-form"
       v-else
       v-slot="$form"
       :initialValues="initialValues"
