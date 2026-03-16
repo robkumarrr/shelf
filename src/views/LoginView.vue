@@ -73,19 +73,25 @@ async function onFormSubmit({ values, valid }: FormSubmitEvent) {
         page.
       </p>
       <div class="flex flex-col gap-y-4">
-        <InputText name="email" type="email" placeholder="Email" />
+        <InputText data-testid="email-input" name="email" type="email" placeholder="Email" />
         <Message v-if="$form.email?.invalid" severity="error" size="small" variant="simple">
           {{ $form.email.error?.message }}
         </Message>
-        <InputText name="password" type="password" placeholder="Password" />
+        <InputText
+          data-testid="password-input"
+          name="password"
+          type="password"
+          placeholder="Password"
+        />
         <Message v-if="$form.password?.invalid" severity="error" size="small" variant="simple">
           {{ $form.password.error?.message }}
         </Message>
         <Button
+          data-testid="login-button"
           class="w-fit mx-auto"
           type="submit"
           severity="secondary"
-          :disabled="isLoading"
+          :disabled="isLoading || !$form.valid"
           label="Login"
         />
       </div>

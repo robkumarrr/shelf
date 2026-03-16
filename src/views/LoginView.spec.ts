@@ -1,11 +1,12 @@
 import { createPinia, setActivePinia } from 'pinia'
-import { mount } from '@vue/test-utils'
+import { flushPromises, mount } from '@vue/test-utils'
 import { describe, expect, it, beforeEach, vi } from 'vitest'
 import { ref } from 'vue'
 import LoginView from '@/views/LoginView.vue'
 import { createRouter, createMemoryHistory } from 'vue-router'
 import PrimeVue from 'primevue/config'
 import ToastService from 'primevue/toastservice'
+import ProgressSpinner from 'primevue/progressspinner'
 
 const router = createRouter({
   history: createMemoryHistory(),
@@ -62,26 +63,22 @@ vi.mock('@/composables/axios/useAxios', () => ({
 }))
 
 describe('Login View', () => {
+  let wrapper: ReturnType<typeof mount>
+
   beforeEach(() => {
     setActivePinia(createPinia())
     mockUserStore.email.value = null
     mockUserStore.username.value = null
+    wrapper = mount(LoginView, {
+      global: {
+        plugins: [createPinia(), router, PrimeVue, ToastService],
+      },
+    })
   })
 
   describe('Mounts and defaults', () => {
-    let wrapper: ReturnType<typeof mount>
-
     beforeEach(() => {
-      wrapper = mount(LoginView, {
-        global: {
-          plugins: [
-            createPinia(),
-            router,
-            PrimeVue,
-            ToastService,
-          ],
-        },
-      })
+      vi.restoreAllMocks()
     })
 
     it('mounts the page', () => {
@@ -103,27 +100,64 @@ describe('Login View', () => {
       expect(username.value).toBe(null);
       expect(email.value).toBe(null);
     })
+
+    it('does not render the progress spinner on mount', () => {
+      const spinner = wrapper.findComponent(ProgressSpinner)
+      expect(spinner.exists()).toBe(false)
+    })
   })
 
-  describe('Authentication', () => {
-    let wrapper: ReturnType<typeof mount>
-
+  describe('Login form behaviour', () => {
     beforeEach(() => {
-      wrapper = mount(LoginView, {
-        global: {
-          plugins: [createPinia(), router, PrimeVue, ToastService],
-        },
-      })
+      vi.restoreAllMocks()
     })
 
-    it('renders the login form', () => {
+    it('renders the login form and login button is disabled', () => {
       const loginForm = wrapper.find('[data-testid="login-form"]')
       expect(loginForm.exists()).toBe(true)
+
+      const loginButton = loginForm.find('[data-testid="login-button"]')
+      expect(loginButton.attributes('disabled')).toBeUndefined()
     })
 
-    it('renders the login form', () => {
+    it('keeps login button disabled if email is valid but password is not valid', async () => {
       const loginForm = wrapper.find('[data-testid="login-form"]')
       expect(loginForm.exists()).toBe(true)
+
+      const emailInput = loginForm.find('[data-testid="email-input"]')
+      expect(emailInput.exists()).toBe(true)
+      await emailInput.setValue('valid@example.com')
+      await emailInput.trigger('blur')
+
+      const passwordInput = loginForm.find('[data-testid="password-input"]')
+      expect(passwordInput.exists()).toBe(true)
+      await passwordInput.setValue('')
+      await passwordInput.trigger('blur')
+
+      await flushPromises()
+
+      const loginButton = loginForm.find('[data-testid="login-button"]')
+      expect(loginButton.attributes('disabled')).toBeDefined()
+    })
+
+    it('keeps login button disabled if password is valid but login is not valid', async () => {
+      const loginForm = wrapper.find('[data-testid="login-form"]')
+      expect(loginForm.exists()).toBe(true)
+
+      const emailInput = loginForm.find('[data-testid="email-input"]')
+      expect(emailInput.exists()).toBe(true)
+      await emailInput.setValue('invalidexample.com')
+      await emailInput.trigger('blur')
+
+      const passwordInput = loginForm.find('[data-testid="password-input"]')
+      expect(passwordInput.exists()).toBe(true)
+      await passwordInput.setValue('validPassword')
+      await passwordInput.trigger('blur')
+
+      await flushPromises()
+
+      const loginButton = loginForm.find('[data-testid="login-button"]')
+      expect(loginButton.attributes('disabled')).toBeDefined()
     })
   })
 })
