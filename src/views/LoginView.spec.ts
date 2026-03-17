@@ -159,6 +159,26 @@ describe('Login View', () => {
       const loginButton = loginForm.find('[data-testid="login-button"]')
       expect(loginButton.attributes('disabled')).toBeDefined()
     })
+
+    it('enables login button if password and email are both valid', async () => {
+      const loginForm = wrapper.find('[data-testid="login-form"]')
+      expect(loginForm.exists()).toBe(true)
+
+      const emailInput = loginForm.find('[data-testid="email-input"]')
+      expect(emailInput.exists()).toBe(true)
+      await emailInput.setValue('valid@example.com')
+      await emailInput.trigger('blur')
+
+      const passwordInput = loginForm.find('[data-testid="password-input"]')
+      expect(passwordInput.exists()).toBe(true)
+      await passwordInput.setValue('validPassword')
+      await passwordInput.trigger('blur')
+
+      await flushPromises()
+
+      const loginButton = loginForm.find('[data-testid="login-button"]')
+      expect(loginButton.attributes('disabled')).toBeUndefined()
+    })
   })
 })
 
