@@ -86,4 +86,43 @@ describe('Auth Store', () => {
       expect(mockUserStore.username.value).toBe(null)
     })
   })
+
+  describe('Login', () => {
+    it('login method makes call to login endpoint', async () => {
+      expect(mockUserStore.email.value).toBe(null)
+      expect(mockUserStore.username.value).toBe(null)
+      expect(authStore.isAuthenticated).toBe(false)
+
+      await authStore.login({
+        email: 'test@example.com',
+        password: 'password',
+      })
+
+      expect(mockGet).toBeCalledWith('/sanctum/csrf-cookie')
+      expect(mockGet).toHaveBeenCalledBefore(mockPost)
+
+      expect(authStore.isAuthenticated).toBe(true)
+      expect(mockUserStore.email.value).toBe('test@example.com')
+      expect(mockUserStore.username.value).toBe('testuser')
+    })
+
+    it('login method catches error', async () => {
+      mockPost.mockRejectedValueOnce(new Error('Server error'))
+      expect(authStore.isAuthenticated).toBe(false)
+
+      await expect(
+        authStore.login({
+          email: 'test@example.com',
+          password: 'password',
+        }),
+      ).rejects.toThrow()
+
+      expect(mockGet).toBeCalledWith('/sanctum/csrf-cookie')
+      expect(mockGet).toHaveBeenCalledBefore(mockPost)
+
+      expect(authStore.isAuthenticated).toBe(false)
+      expect(mockUserStore.email.value).toBe(null)
+      expect(mockUserStore.username.value).toBe(null)
+    })
+  })
 })
