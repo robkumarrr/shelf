@@ -63,6 +63,14 @@ vi.mock('@/composables/axios/useAxios', () => ({
   }),
 }))
 
+const mockToastAdd = vi.fn()
+
+vi.mock('primevue/usetoast', () => ({
+  useToast: () => ({
+    add: mockToastAdd,
+  }),
+}))
+
 describe('Login View', () => {
   let wrapper: ReturnType<typeof mount>
 
@@ -202,6 +210,36 @@ describe('Login View', () => {
       expect(mockAuthStore.login).toHaveBeenCalledWith({
         email: 'valid@example.com',
         password: 'validPassword',
+      })
+    })
+
+    it('a success toast is rendered on-screen when the login information is submitted correctly', async () => {
+      const loginForm = wrapper.find('[data-testid="login-form"]')
+      expect(loginForm.exists()).toBe(true)
+
+      const emailInput = loginForm.find('[data-testid="email-input"]')
+      expect(emailInput.exists()).toBe(true)
+      await emailInput.setValue('valid@example.com')
+      await emailInput.trigger('blur')
+
+      const passwordInput = loginForm.find('[data-testid="password-input"]')
+      expect(passwordInput.exists()).toBe(true)
+      await passwordInput.setValue('validPassword')
+      await passwordInput.trigger('blur')
+
+      await loginForm.trigger('submit')
+      await flushPromises()
+
+      console.log(mockPost.mock.calls)
+      expect(mockAuthStore.login).toHaveBeenCalledWith({
+        email: 'valid@example.com',
+        password: 'validPassword',
+      })
+
+      expect(mockToastAdd).toHaveBeenCalledWith({
+        severity: 'success',
+        summary: 'Login successful. Redirecting...',
+        life: 3000,
       })
     })
   })
