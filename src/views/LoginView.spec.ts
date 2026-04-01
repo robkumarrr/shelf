@@ -206,7 +206,6 @@ describe('Login View', () => {
       await loginForm.trigger('submit');
       await flushPromises()
 
-      console.log(mockPost.mock.calls)
       expect(mockAuthStore.login).toHaveBeenCalledWith({
         email: 'valid@example.com',
         password: 'validPassword',
@@ -230,7 +229,6 @@ describe('Login View', () => {
       await loginForm.trigger('submit')
       await flushPromises()
 
-      console.log(mockPost.mock.calls)
       expect(mockAuthStore.login).toHaveBeenCalledWith({
         email: 'valid@example.com',
         password: 'validPassword',
@@ -239,6 +237,32 @@ describe('Login View', () => {
       expect(mockToastAdd).toHaveBeenCalledWith({
         severity: 'success',
         summary: 'Login successful. Redirecting...',
+        life: 3000,
+      })
+    })
+
+    it('an error toast is rendered on-screen when the login fails', async () => {
+      const loginForm = wrapper.find('[data-testid="login-form"]')
+      expect(loginForm.exists()).toBe(true)
+
+      mockAuthStore.login.mockRejectedValueOnce(new Error('Login failed'))
+
+      const emailInput = loginForm.find('[data-testid="email-input"]')
+      expect(emailInput.exists()).toBe(true)
+      await emailInput.setValue('valid@example.com')
+      await emailInput.trigger('blur')
+
+      const passwordInput = loginForm.find('[data-testid="password-input"]')
+      expect(passwordInput.exists()).toBe(true)
+      await passwordInput.setValue('validPassword')
+      await passwordInput.trigger('blur')
+
+      await loginForm.trigger('submit')
+      await flushPromises()
+
+      expect(mockToastAdd).toHaveBeenCalledWith({
+        severity: 'error',
+        summary: 'Login failed: Error: Login failed',
         life: 3000,
       })
     })
