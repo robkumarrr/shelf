@@ -1,5 +1,5 @@
 import { createPinia, setActivePinia } from 'pinia'
-import { flushPromises, mount } from '@vue/test-utils'
+import { DOMWrapper, flushPromises, mount } from '@vue/test-utils'
 import { describe, expect, it, beforeEach, vi } from 'vitest'
 import { ref } from 'vue'
 import LoginView from '@/views/LoginView.vue'
@@ -73,6 +73,7 @@ vi.mock('primevue/usetoast', () => ({
 
 describe('Login View', () => {
   let wrapper: ReturnType<typeof mount>
+  let loginForm: DOMWrapper<Element>
 
   beforeEach(() => {
     setActivePinia(createPinia())
@@ -83,6 +84,7 @@ describe('Login View', () => {
         plugins: [createPinia(), router, PrimeVue, ToastService],
       },
     })
+    loginForm = wrapper.find('[data-testid="login-form"]')
   })
 
   describe('Mounts and defaults', () => {
@@ -116,13 +118,35 @@ describe('Login View', () => {
     })
   })
 
+  async function setupValidFormData(
+    email: string = 'valid@example.com',
+    password: string = 'validPassword',
+    submit: boolean = false
+  ) {
+    expect(loginForm.exists()).toBe(true)
+
+    const emailInput = loginForm.find('[data-testid="email-input"]')
+    expect(emailInput.exists()).toBe(true)
+    await emailInput.setValue(email)
+    await emailInput.trigger('blur')
+
+    const passwordInput = loginForm.find('[data-testid="password-input"]')
+    expect(passwordInput.exists()).toBe(true)
+
+    await passwordInput.setValue(password)
+    await passwordInput.trigger('blur')
+
+    if (submit) await loginForm.trigger('submit')
+
+    await flushPromises()
+  }
+
   describe('Login form behaviour', () => {
     beforeEach(() => {
       vi.restoreAllMocks()
     })
 
     it('renders the login form and login button is disabled', () => {
-      const loginForm = wrapper.find('[data-testid="login-form"]')
       expect(loginForm.exists()).toBe(true)
 
       const loginButton = loginForm.find('[data-testid="login-button"]')
@@ -130,81 +154,28 @@ describe('Login View', () => {
     })
 
     it('keeps login button disabled if email is valid but password is not valid', async () => {
-      const loginForm = wrapper.find('[data-testid="login-form"]')
-      expect(loginForm.exists()).toBe(true)
-
-      const emailInput = loginForm.find('[data-testid="email-input"]')
-      expect(emailInput.exists()).toBe(true)
-      await emailInput.setValue('valid@example.com')
-      await emailInput.trigger('blur')
-
-      const passwordInput = loginForm.find('[data-testid="password-input"]')
-      expect(passwordInput.exists()).toBe(true)
-      await passwordInput.setValue('')
-      await passwordInput.trigger('blur')
-
-      await flushPromises()
+      await setupValidFormData('valid@email.com', '')
 
       const loginButton = loginForm.find('[data-testid="login-button"]')
       expect(loginButton.attributes('disabled')).toBeDefined()
     })
 
     it('keeps login button disabled if password is valid but login is not valid', async () => {
-      const loginForm = wrapper.find('[data-testid="login-form"]')
-      expect(loginForm.exists()).toBe(true)
-
-      const emailInput = loginForm.find('[data-testid="email-input"]')
-      expect(emailInput.exists()).toBe(true)
-      await emailInput.setValue('invalidexample.com')
-      await emailInput.trigger('blur')
-
-      const passwordInput = loginForm.find('[data-testid="password-input"]')
-      expect(passwordInput.exists()).toBe(true)
-      await passwordInput.setValue('validPassword')
-      await passwordInput.trigger('blur')
-
-      await flushPromises()
+      await setupValidFormData('invalidemail.com')
 
       const loginButton = loginForm.find('[data-testid="login-button"]')
       expect(loginButton.attributes('disabled')).toBeDefined()
     })
 
     it('enables login button if password and email are both valid', async () => {
-      const loginForm = wrapper.find('[data-testid="login-form"]')
-      expect(loginForm.exists()).toBe(true)
-
-      const emailInput = loginForm.find('[data-testid="email-input"]')
-      expect(emailInput.exists()).toBe(true)
-      await emailInput.setValue('valid@example.com')
-      await emailInput.trigger('blur')
-
-      const passwordInput = loginForm.find('[data-testid="password-input"]')
-      expect(passwordInput.exists()).toBe(true)
-      await passwordInput.setValue('validPassword')
-      await passwordInput.trigger('blur')
-
-      await flushPromises()
+      await setupValidFormData()
 
       const loginButton = loginForm.find('[data-testid="login-button"]')
       expect(loginButton.attributes('disabled')).toBeUndefined()
     })
 
     it('submitting valid credentials calls the API with correct payload', async () => {
-      const loginForm = wrapper.find('[data-testid="login-form"]')
-      expect(loginForm.exists()).toBe(true)
-
-      const emailInput = loginForm.find('[data-testid="email-input"]')
-      expect(emailInput.exists()).toBe(true)
-      await emailInput.setValue('valid@example.com')
-      await emailInput.trigger('blur')
-
-      const passwordInput = loginForm.find('[data-testid="password-input"]')
-      expect(passwordInput.exists()).toBe(true)
-      await passwordInput.setValue('validPassword')
-      await passwordInput.trigger('blur')
-
-      await loginForm.trigger('submit');
-      await flushPromises()
+      await setupValidFormData('valid@example.com', 'validPassword', true)
 
       expect(mockAuthStore.login).toHaveBeenCalledWith({
         email: 'valid@example.com',
@@ -213,21 +184,7 @@ describe('Login View', () => {
     })
 
     it('a success toast is rendered on-screen when the login information is submitted correctly', async () => {
-      const loginForm = wrapper.find('[data-testid="login-form"]')
-      expect(loginForm.exists()).toBe(true)
-
-      const emailInput = loginForm.find('[data-testid="email-input"]')
-      expect(emailInput.exists()).toBe(true)
-      await emailInput.setValue('valid@example.com')
-      await emailInput.trigger('blur')
-
-      const passwordInput = loginForm.find('[data-testid="password-input"]')
-      expect(passwordInput.exists()).toBe(true)
-      await passwordInput.setValue('validPassword')
-      await passwordInput.trigger('blur')
-
-      await loginForm.trigger('submit')
-      await flushPromises()
+      await setupValidFormData('valid@example.com', 'validPassword', true)
 
       expect(mockToastAdd).toHaveBeenCalledWith({
         severity: 'success',
@@ -237,23 +194,8 @@ describe('Login View', () => {
     })
 
     it('an error toast is rendered on-screen when the login fails', async () => {
-      const loginForm = wrapper.find('[data-testid="login-form"]')
-      expect(loginForm.exists()).toBe(true)
-
       mockAuthStore.login.mockRejectedValueOnce(new Error('Login failed'))
-
-      const emailInput = loginForm.find('[data-testid="email-input"]')
-      expect(emailInput.exists()).toBe(true)
-      await emailInput.setValue('valid@example.com')
-      await emailInput.trigger('blur')
-
-      const passwordInput = loginForm.find('[data-testid="password-input"]')
-      expect(passwordInput.exists()).toBe(true)
-      await passwordInput.setValue('validPassword')
-      await passwordInput.trigger('blur')
-
-      await loginForm.trigger('submit')
-      await flushPromises()
+      await setupValidFormData('valid@example.com', 'validPassword', true)
 
       expect(mockToastAdd).toHaveBeenCalledWith({
         severity: 'error',
@@ -263,21 +205,7 @@ describe('Login View', () => {
     })
 
     it('redirects to the home page after successful login', async () => {
-      const loginForm = wrapper.find('[data-testid="login-form"]')
-      expect(loginForm.exists()).toBe(true)
-
-      const emailInput = loginForm.find('[data-testid="email-input"]')
-      expect(emailInput.exists()).toBe(true)
-      await emailInput.setValue('valid@example.com')
-      await emailInput.trigger('blur')
-
-      const passwordInput = loginForm.find('[data-testid="password-input"]')
-      expect(passwordInput.exists()).toBe(true)
-      await passwordInput.setValue('validPassword')
-      await passwordInput.trigger('blur')
-
-      await loginForm.trigger('submit')
-      await flushPromises()
+      await setupValidFormData('valid@example.com', 'validPassword', true)
 
       expect(router.currentRoute.value.path).toBe('/');
     })
