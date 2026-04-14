@@ -1,0 +1,213 @@
+import { createPinia, setActivePinia } from 'pinia'
+import { DOMWrapper, flushPromises, mount } from '@vue/test-utils'
+import { describe, expect, it, beforeEach, vi } from 'vitest'
+import { ref } from 'vue'
+import LoginView from '@/views/LoginView.vue'
+import { createRouter, createMemoryHistory } from 'vue-router'
+import PrimeVue from 'primevue/config'
+import ToastService from 'primevue/toastservice'
+import ProgressSpinner from 'primevue/progressspinner'
+
+const router = createRouter({
+  history: createMemoryHistory(),
+  routes: [
+    { path: '/', component: { template: '<div />' } },
+    { path: '/register', component: { template: '<div />' } },
+  ],
+})
+
+const mockUserStore = {
+  username: ref<string | null>(null),
+  email: ref<string | null>(null),
+}
+
+vi.mock('@/stores/userStore', () => ({
+  useUserStore: () => mockUserStore,
+}))
+
+const mockAuthStore = {
+  isAuthenticated: ref<boolean>(false),
+  login: vi.fn(),
+}
+
+vi.mock('@/stores/authStore', () => ({
+  useAuthStore: () => mockAuthStore,
+}))
+
+const mockLoadingStore = {
+  isLoading: ref<boolean>(false),
+}
+
+vi.mock('@/stores/loadingStore', () => ({
+  useLoadingStore: () => mockLoadingStore,
+}))
+
+const mockPost = vi.fn().mockResolvedValue({
+  status: 201,
+  data: {
+    data: {
+      attributes: {
+        name: 'testuser',
+        email: 'test@example.com',
+      },
+    },
+  },
+})
+
+const mockGet = vi.fn().mockResolvedValue({ data: null })
+
+vi.mock('@/composables/axios/useAxios', () => ({
+  useAxios: () => ({
+    get: mockGet,
+    post: mockPost,
+  }),
+}))
+
+const mockToastAdd = vi.fn()
+
+vi.mock('primevue/usetoast', () => ({
+  useToast: () => ({
+    add: mockToastAdd,
+  }),
+}))
+
+describe('Login View', () => {
+  let wrapper: ReturnType<typeof mount>
+  let loginForm: DOMWrapper<Element>
+
+  beforeEach(() => {
+    setActivePinia(createPinia())
+    mockUserStore.email.value = null
+    mockUserStore.username.value = null
+    wrapper = mount(LoginView, {
+      global: {
+        plugins: [createPinia(), router, PrimeVue, ToastService],
+      },
+    })
+    loginForm = wrapper.find('[data-testid="login-form"]')
+  })
+
+  describe('Mounts and defaults', () => {
+    beforeEach(() => {
+      vi.restoreAllMocks()
+    })
+
+    it('mounts the page', () => {
+      expect(wrapper.exists()).toBe(true)
+    })
+
+    it('loading store values are default', () => {
+      const { isLoading } = mockLoadingStore;
+      expect(isLoading.value).toBe(false);
+    })
+
+    it('auth store values are default', () => {
+      const { isAuthenticated } = mockAuthStore;
+      expect(isAuthenticated.value).toBe(false);
+    })
+
+    it('user store values are default', () => {
+      const { username, email } = mockUserStore;
+      expect(username.value).toBe(null);
+      expect(email.value).toBe(null);
+    })
+
+    it('does not render the progress spinner on mount', () => {
+      const spinner = wrapper.findComponent(ProgressSpinner)
+      expect(spinner.exists()).toBe(false)
+    })
+  })
+
+  async function setupValidFormData(
+    email: string = 'valid@example.com',
+    password: string = 'validPassword',
+    submit: boolean = false
+  ) {
+    expect(loginForm.exists()).toBe(true)
+
+    const emailInput = loginForm.find('[data-testid="email-input"]')
+    expect(emailInput.exists()).toBe(true)
+    await emailInput.setValue(email)
+    await emailInput.trigger('blur')
+
+    const passwordInput = loginForm.find('[data-testid="password-input"]')
+    expect(passwordInput.exists()).toBe(true)
+
+    await passwordInput.setValue(password)
+    await passwordInput.trigger('blur')
+
+    if (submit) await loginForm.trigger('submit')
+
+    await flushPromises()
+  }
+
+  describe('Login form behaviour', () => {
+    beforeEach(() => {
+      vi.restoreAllMocks()
+    })
+
+    it('renders the login form and login button is disabled', () => {
+      expect(loginForm.exists()).toBe(true)
+
+      const loginButton = loginForm.find('[data-testid="login-button"]')
+      expect(loginButton.attributes('disabled')).toBeUndefined()
+    })
+
+    it('keeps login button disabled if email is valid but password is not valid', async () => {
+      await setupValidFormData('valid@email.com', '')
+
+      const loginButton = loginForm.find('[data-testid="login-button"]')
+      expect(loginButton.attributes('disabled')).toBeDefined()
+    })
+
+    it('keeps login button disabled if password is valid but login is not valid', async () => {
+      await setupValidFormData('invalidemail.com')
+
+      const loginButton = loginForm.find('[data-testid="login-button"]')
+      expect(loginButton.attributes('disabled')).toBeDefined()
+    })
+
+    it('enables login button if password and email are both valid', async () => {
+      await setupValidFormData()
+
+      const loginButton = loginForm.find('[data-testid="login-button"]')
+      expect(loginButton.attributes('disabled')).toBeUndefined()
+    })
+
+    it('submitting valid credentials calls the API with correct payload', async () => {
+      await setupValidFormData('valid@example.com', 'validPassword', true)
+
+      expect(mockAuthStore.login).toHaveBeenCalledWith({
+        email: 'valid@example.com',
+        password: 'validPassword',
+      })
+    })
+
+    it('a success toast is rendered on-screen when the login information is submitted correctly', async () => {
+      await setupValidFormData('valid@example.com', 'validPassword', true)
+
+      expect(mockToastAdd).toHaveBeenCalledWith({
+        severity: 'success',
+        summary: 'Login successful. Redirecting...',
+        life: 3000,
+      })
+    })
+
+    it('an error toast is rendered on-screen when the login fails', async () => {
+      mockAuthStore.login.mockRejectedValueOnce(new Error('Login failed'))
+      await setupValidFormData('valid@example.com', 'validPassword', true)
+
+      expect(mockToastAdd).toHaveBeenCalledWith({
+        severity: 'error',
+        summary: 'Login failed: Error: Login failed',
+        life: 3000,
+      })
+    })
+
+    it('redirects to the home page after successful login', async () => {
+      await setupValidFormData('valid@example.com', 'validPassword', true)
+
+      expect(router.currentRoute.value.path).toBe('/');
+    })
+  })
+})
